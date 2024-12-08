@@ -26,8 +26,7 @@ export default function SignInPage() {
     try {
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: '/auth/callback', // Redireciona antes do login (ajuste conforme necessário)
-        redirectUrlComplete: '/', // Redireciona após o login (ajuste conforme necessário)
+        redirectUrl: window.location.origin + '/auth/callback',  // Certifique-se que o redirectUrl é correto.
       });
       console.log('Redirecionado para autenticação com Google.');
     } catch (err) {
