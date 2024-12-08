@@ -22,9 +22,11 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      await client.passwords.request({
+      // Método correto para enviar link de redefinição de senha
+      await client.messages.resetPasswordForUser({
         emailAddress: email,
       });
+
       setMessage('Um link para redefinição foi enviado para o seu e-mail.');
     } catch (err) {
       console.error('Erro ao solicitar redefinição de senha:', err);
