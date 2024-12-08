@@ -14,7 +14,8 @@ export default function SignUpPage() {
   const [error, setError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSignUp = async (e) => {
+  // Corrigido: Tipagem de 'e' como React.FormEvent
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoaded || isProcessing) return;
 
