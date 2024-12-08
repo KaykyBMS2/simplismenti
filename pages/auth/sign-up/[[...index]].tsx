@@ -2,6 +2,7 @@
 
 import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import Link from "next/link";
 import { FcGoogle } from 'react-icons/fc';
 import React, { useState, useEffect } from 'react';
 
@@ -147,9 +148,9 @@ export default function SignUpPage() {
         </button>
         <p className="mt-6 text-center text-sm text-gray-400">
           Já tem uma conta?{' '}
-          <a href="/auth/sign-in" className="text-indigo-400 hover:underline">
+          <Link href="/auth/sign-in" className="text-indigo-400 hover:underline">
             Faça Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useSignIn } from '@clerk/nextjs';
+import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { FcGoogle } from 'react-icons/fc';
 import React, { useState, useEffect } from 'react';
@@ -129,9 +130,9 @@ export default function SignInPage() {
         </p>
         <p className="mt-6 text-center text-sm text-gray-400">
           Não tem uma conta?{' '}
-          <a href="/auth/sign-up" className="text-indigo-400 hover:underline">
+          <Link href="/auth/sign-up" className="text-indigo-400 hover:underline">
             Crie uma aqui
-          </a>
+          </Link>
         </p>
       </div>
     </div>
