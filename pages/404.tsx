@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function PaginaNaoEncontrada() {
   return (
@@ -26,18 +27,18 @@ export default function PaginaNaoEncontrada() {
             Ela pode ter sido movida ou não existe mais.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
+            <Link
               href="/"
               className="w-full sm:w-auto rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline focus:ring-2 focus:ring-indigo-500"
             >
               Voltar para a página inicial
-            </a>
-            <a
+            </Link>
+            <Link
               href="/suporte"
               className="text-sm font-semibold text-gray-300 dark:hover:text-gray-400"
             >
               Entre em contato com o suporte &rarr;
-            </a>
+            </Link>
           </div>
         </main>
       </div>
