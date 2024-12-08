@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -17,11 +18,27 @@ export default function SignInPage() {
     if (!isLoaded) return;
 
     try {
-      await signIn.create({ identifier: email, password });
-      await signIn.attemptFirstFactor();
-      router.push('/dashboard'); // Redireciona após login bem-sucedido
+      const result = await signIn.create({ identifier: email, password });
+      if (result.status === 'needs_first_factor') {
+        router.push('/auth/verify'); // Redireciona para OTP
+      } else {
+        router.push('/'); // Redireciona para a home
+      }
     } catch (err: any) {
       setError('Credenciais inválidas. Verifique seu email e senha.');
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!isLoaded) return;
+
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/auth/verify', // Para OTP se necessário
+      });
+    } catch (err: any) {
+      setError('Erro ao tentar fazer login com Google.');
     }
   };
 
@@ -52,9 +69,14 @@ export default function SignInPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-100">
-              Senha
-            </label>
+            <div className="flex justify-between">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-100">
+                Senha
+              </label>
+              <a href="/auth/forgot-password" className="text-sm font-semibold text-indigo-400 hover:text-indigo-300">
+                Esqueceu a senha?
+              </a>
+            </div>
             <input
               id="password"
               name="password"
@@ -75,6 +97,15 @@ export default function SignInPage() {
             </button>
           </div>
         </form>
+
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center gap-2 rounded-md bg-white px-3 py-2 text-gray-800 border border-gray-300 hover:bg-gray-100"
+          >
+            <FcGoogle size={20} /> Entrar com Google
+          </button>
+        </div>
 
         <p className="mt-6 text-center text-sm text-gray-400">
           Não tem conta?{' '}

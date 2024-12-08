@@ -1,18 +1,34 @@
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider, useClerk } from '@clerk/nextjs';  // Corrigir importação
 import { dark } from '@clerk/themes';
+import type { AppProps } from 'next/app';
 import { ptBR } from '@clerk/localizations';
-import "../styles/globals.css";
+import '../styles/globals.css';
+import { useState, useEffect } from 'react';
+import Loading from './Loading'; // Componente de Loading
 
 export default function App({ Component, pageProps }: AppProps) {
-  console.log("Clerk Frontend API:", process.env.NEXT_PUBLIC_CLERK_FRONTEND_API);  // Verificando a URL
-
   return (
-    <ClerkProvider 
-      frontendApi={process.env.NEXT_PUBLIC_CLERK_FRONTEND_API}  // Garantindo que o ClerkProvider está usando a variável correta
-      appearance={{ baseTheme: dark }} 
-      localization={ptBR}
-    >
-      <Component {...pageProps} />
+    <ClerkProvider appearance={{ baseTheme: dark }} localization={ptBR}>
+      <ClerkWrapper>
+        <Component {...pageProps} />
+      </ClerkWrapper>
     </ClerkProvider>
   );
 }
+
+const ClerkWrapper = ({ children }: { children: React.ReactNode }) => {
+  const [isClerkLoaded, setIsClerkLoaded] = useState(false);
+  const { isLoaded } = useClerk(); // Agora dentro do `ClerkProvider`
+
+  useEffect(() => {
+    if (isLoaded) {
+      setIsClerkLoaded(true);
+    }
+  }, [isLoaded]);
+
+  if (!isClerkLoaded) {
+    return <Loading />; // Exibe a tela de carregamento enquanto o Clerk não carrega
+  }
+
+  return <>{children}</>;
+};
