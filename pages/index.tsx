@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import Layout from "./components/Layout";
-import CookieModal from "./components/CookieModal";
+import CookieModal from "./components/Modals/CookieModal";
 import ComingSoon from "./components/ComingSoon";
 
 const Home: NextPage = () => {

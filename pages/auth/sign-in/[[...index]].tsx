@@ -9,6 +9,7 @@ export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);  // Controle do modal
   const { isLoaded, signIn } = useSignIn();
   const router = useRouter();
 
@@ -22,7 +23,10 @@ export default function SignInPage() {
       if (result.status === 'needs_first_factor') {
         router.push('/auth/verify'); // Redireciona para OTP
       } else {
-        router.push('/'); // Redireciona para a home
+        setIsModalOpen(true); // Abre o modal após login bem-sucedido
+        setTimeout(() => {
+          router.push('/'); // Redireciona para a home após 5 segundos
+        }, 5000);
       }
     } catch (err: any) {
       setError('Credenciais inválidas. Verifique seu email e senha.');
@@ -33,9 +37,11 @@ export default function SignInPage() {
     if (!isLoaded) return;
 
     try {
+      // Adicionando o parâmetro redirectUrlComplete
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/auth/verify', // Para OTP se necessário
+        redirectUrlComplete: '/auth/verify', // A URL final após o login ser concluído
       });
     } catch (err: any) {
       setError('Erro ao tentar fazer login com Google.');
@@ -114,6 +120,20 @@ export default function SignInPage() {
           </a>
         </p>
       </div>
+
+      {/* Modal de sucesso */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <div className="flex justify-center mb-4">
+              {/* GIF ou SVG animado */}
+              <img src="/success-animation.gif" alt="Sucesso" className="h-32 w-32" />
+            </div>
+            <p className="text-lg font-semibold text-gray-700">Verificação confirmada com sucesso!</p>
+            <p className="mt-4 text-sm text-gray-500">Você será redirecionado para a página inicial em breve...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

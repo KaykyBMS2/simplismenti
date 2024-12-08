@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FaInstagram, FaYoutube, FaTiktok, FaDiscord } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { resetCookies } from "../../components/CookieModal";
+import { resetCookies } from "../../components/Modals/CookieModal";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
