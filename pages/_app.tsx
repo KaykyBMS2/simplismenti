@@ -1,4 +1,4 @@
-import { ClerkProvider, useClerk } from '@clerk/nextjs';  // Corrigir importação
+import { ClerkProvider, useClerk, useSession } from '@clerk/nextjs'; // Corrigir importação
 import { dark } from '@clerk/themes';
 import type { AppProps } from 'next/app';
 import { ptBR } from '@clerk/localizations';
@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
 const ClerkWrapper = ({ children }: { children: React.ReactNode }) => {
   const [isClerkLoaded, setIsClerkLoaded] = useState(false);
-  const { isLoaded } = useClerk(); // Agora dentro do `ClerkProvider`
+  const { isLoaded } = useSession(); // Corrigido para usar useSession() que retorna isLoaded
 
   useEffect(() => {
     if (isLoaded) {
