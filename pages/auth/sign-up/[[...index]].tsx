@@ -52,7 +52,12 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     try {
-      await signUp.authenticateWithRedirect({ strategy: 'oauth_google' });
+      // Corrigido: adiciona redirectUrlComplete e redirectUrl
+      await signUp.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: window.location.origin + '/auth/callback',  // URL de retorno após autenticação com Google
+        redirectUrlComplete: window.location.origin + '/',      // Redirecionamento após autenticação bem-sucedida
+      });
     } catch (err) {
       console.error("Erro ao autenticar com Google:", err);
       setError('Erro ao autenticar com Google. Tente novamente.');
