@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Layout from "../../components/Layout";
+import Link from "next/link";
 import CookieModal from "../../components/CookieModal";
 
 const Policies: NextPage = () => {
@@ -65,9 +66,9 @@ const Policies: NextPage = () => {
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Conforme a LGPD, você pode acessar, corrigir ou excluir seus dados, solicitar portabilidade ou revogar
               consentimento. Entre em contato pelo e-mail:{" "}
-              <a href="mailto:simplismenti@suporte.com" className="text-blue-500 underline">
-                simplismenti@suporte.com
-              </a>
+              <Link href="mailto:suporte@simplismenti.online" className="text-blue-500 underline">
+                suporte@simplismenti.online
+              </Link>
               .
             </p>
           </div>
@@ -112,9 +113,9 @@ const Policies: NextPage = () => {
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mt-8 mb-4">5. Contato</h2>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
             Para dúvidas, entre em contato pelo e-mail:{" "}
-            <a href="mailto:simplismenti@suporte.com" className="text-blue-500 underline">
-              simplismenti@suporte.com
-            </a>
+            <Link href="mailto:suporte@simplismenti.online" className="text-blue-500 underline">
+              suporte@simplismenti.online
+            </Link>
             .
           </p>
         </section>
