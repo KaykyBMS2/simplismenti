@@ -124,9 +124,9 @@ export default function SignInPage() {
           <FcGoogle className="mr-2" /> Entrar com Google
         </button>
         <p className="mt-6 text-center text-sm text-gray-400">
-          <a href="/auth/forgot-password" className="text-indigo-400 hover:underline">
+          <Link href="/auth/forgot-password" className="text-indigo-400 hover:underline">
             Esqueceu sua senha?
-          </a>
+          </Link>
         </p>
         <p className="mt-6 text-center text-sm text-gray-400">
           Não tem uma conta?{' '}
