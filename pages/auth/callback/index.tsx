@@ -11,8 +11,8 @@ export default function CallbackPage() {
     // Esta função trata a resposta da autenticação do Clerk
     async function handleCallback() {
       try {
-        // Certifique-se de chamar handleRedirectCallback corretamente
-        await handleRedirectCallback();  // Sem parâmetros necessários aqui.
+        // A função handleRedirectCallback agora espera um ou dois parâmetros
+        await handleRedirectCallback(router.query);  // Passando a URL de query como argumento
         // Após o callback, redireciona para a página principal ou qualquer outra
         router.push('/');
       } catch (err) {
@@ -24,5 +24,5 @@ export default function CallbackPage() {
     handleCallback();
   }, [handleRedirectCallback, router]);
 
-  return <div><Image src="/loading.svg"  width={75} height={75} alt="loading..."/></div>;
+  return <div><Image src="/loading.svg" width={75} height={75} alt="loading..." /></div>;
 }
