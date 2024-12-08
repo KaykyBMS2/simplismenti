@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 export default function VerifyPage() {
   const [otpCode, setOtpCode] = useState('');
   const [error, setError] = useState('');
+  const [isResending, setIsResending] = useState(false);
+  const [isCodeSent, setIsCodeSent] = useState(false);
   const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
   const router = useRouter();
@@ -17,14 +19,44 @@ export default function VerifyPage() {
     if (!isSignInLoaded && !isSignUpLoaded) return;
 
     try {
+      // Log de depuração
+      console.log("Tentando validar código:", otpCode);
+
       if (signIn && signIn.firstFactorVerification) {
+        // Tenta realizar a verificação do primeiro fator (login)
         await signIn.attemptFirstFactor({ code: otpCode });
       } else if (signUp && signUp.verifications.emailAddress) {
+        // Tenta validar o código de verificação do e-mail
         await signUp.attemptEmailAddressVerification({ code: otpCode });
       }
-      router.push('/'); // Redireciona para a home após sucesso
+
+      // Se a verificação for bem-sucedida, redireciona para a página principal
+      router.push('/');
     } catch (err: any) {
+      // Verifica o tipo de erro e exibe a mensagem apropriada
+      console.error("Erro ao tentar validar o código:", err);
       setError('Código inválido ou expirado. Tente novamente.');
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (isResending) return; // Previne múltiplos cliques no botão
+
+    setIsResending(true);
+    setError('');
+
+    try {
+      if (signUp && signUp.prepareEmailAddressVerification) {
+        // Reenvia o código de verificação
+        await signUp.prepareEmailAddressVerification();
+        setIsCodeSent(true); // Marca que o código foi enviado
+        console.log("Código de verificação reenviado com sucesso.");
+      }
+    } catch (err: any) {
+      setError('Erro ao reenviar o código. Tente novamente.');
+      console.error('Erro ao tentar reenviar o código:', err);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -69,10 +101,20 @@ export default function VerifyPage() {
 
         <p className="mt-6 text-center text-sm text-gray-400">
           Não recebeu o código?{' '}
-          <a href="/auth/resend-code" className="font-semibold text-indigo-400 hover:text-indigo-300">
-            Reenviar Código
-          </a>
+          <button
+            onClick={handleResendCode}
+            className="font-semibold text-indigo-400 hover:text-indigo-300"
+            disabled={isResending}
+          >
+            {isResending ? 'Enviando...' : 'Reenviar Código'}
+          </button>
         </p>
+
+        {isCodeSent && (
+          <p className="text-sm text-green-400 text-center mt-4">
+            Um novo código foi enviado para o seu email.
+          </p>
+        )}
       </div>
     </div>
   );

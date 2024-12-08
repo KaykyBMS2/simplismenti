@@ -1,10 +1,16 @@
+"use client";
+
 import Head from "next/head";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs"; // Hook para autenticação
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState("light");
+  const pathname = usePathname();
+  const { isSignedIn } = useAuth(); // Estado de autenticação do usuário
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -29,6 +35,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
     return () => darkModeMediaQuery.removeEventListener("change", handleThemeChange);
   }, []);
+
+  // Refresh automático na página inicial após login, sem loop infinito
+  useEffect(() => {
+    const refreshKey = "home_refreshed";
+    const hasRefreshed = sessionStorage.getItem(refreshKey);
+
+    if (pathname === "/" && !isSignedIn && !hasRefreshed) {
+      sessionStorage.setItem(refreshKey, "true");
+      window.location.reload();
+    }
+  }, [pathname, isSignedIn]);
 
   const themeLogo = theme === "dark" ? "spm_white.svg" : "spm_black.svg";
 

@@ -1,125 +1,154 @@
 'use client';
 
-import { useState } from 'react';
 import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { FcGoogle } from 'react-icons/fc';
+import React, { useState, useEffect } from 'react';
 
 export default function SignUpPage() {
-  const { isLoaded, signUp } = useSignUp();
-  const [email, setEmail] = useState('');
+  const { signUp, isLoaded } = useSignUp();
+  const router = useRouter();
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    console.log("isLoaded status:", isLoaded);
+  }, [isLoaded]);
+
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isLoaded) return;
+    // Checar se o Clerk foi carregado e se o processamento não está em andamento
+    if (!isLoaded) {
+      console.log("Clerk não carregado, aguardando...");
+      setError("O sistema está carregando. Tente novamente em breve.");
+      return;
+    }
+
+    if (isProcessing) {
+      console.log("Processamento já em andamento.");
+      return;
+    }
+
+    setIsProcessing(true);
+    setError('');
+
+    console.log("Tentando criar conta com:", { email, password, username });
 
     try {
-      const result = await signUp.create({ emailAddress: email, password, username });
-      if (result.status === 'needs_email_address_verification') {
-        router.push('/auth/verify'); // Redireciona para OTP
+      // Tentando criar o usuário
+      const result = await signUp.create({
+        emailAddress: email,
+        password,
+        unsafeMetadata: { username },
+      });
+
+      console.log("Conta criada com sucesso:", result);
+
+      // Tenta preparar o envio do código de verificação
+      await signUp.prepareEmailAddressVerification();
+
+      console.log("Email de verificação enviado.");
+
+      // Redireciona para a página de verificação
+      router.push('/auth/verify');
+    } catch (err) {
+      console.error("Erro ao criar conta:", err);
+
+      if (err instanceof Error) {
+        setError(err.message || 'Erro ao criar a conta.');
+        console.log("Detalhes do erro:", err);
+      } else {
+        setError('Erro inesperado ao criar a conta. Tente novamente.');
       }
-    } catch (err: any) {
-      setError('Erro ao criar conta. Verifique os dados e tente novamente.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
-    if (!isLoaded) return;
-
+    console.log("Iniciando autenticação com Google...");
     try {
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: '/auth/verify',
+        redirectUrl: window.location.origin + '/',
+        redirectUrlComplete: window.location.origin + '/',
       });
-    } catch (err: any) {
-      setError('Erro ao criar conta com Google.');
+    } catch (err) {
+      console.error("Erro ao autenticar com Google:", err);
+      setError('Erro ao autenticar com Google. Tente novamente.');
     }
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col justify-center items-center bg-gray-900">
-      <div className="text-center">
-        <img src="/spm_white.svg" alt="SPM logo" className="mx-auto h-32 w-auto" />
-        <h2 className="mt-10 text-2xl font-bold text-gray-100">Crie sua conta!</h2>
-      </div>
-
-      <div className="w-full max-w-sm mt-8">
-        {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="w-[90%] max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
+        <img alt="SPM logo" src="/spm_white.svg" className="mx-auto h-[150px] w-auto" />
+        <h1 className="text-2xl font-bold text-white text-center mb-6 mt-6">Crie sua Conta</h1>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <form onSubmit={handleSignUp} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-100">
-              Nome de Usuário
+            <label htmlFor="username" className="block text-sm font-medium text-gray-300">
+              Crie um Nome
             </label>
             <input
               id="username"
-              name="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="block w-full rounded-md bg-gray-800 px-3 py-2 text-gray-100 border border-gray-600 focus:ring-2 focus:ring-indigo-600"
+              className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-100">
-              Email
+            <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+              Seu melhor email
             </label>
             <input
               id="email"
-              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="block w-full rounded-md bg-gray-800 px-3 py-2 text-gray-100 border border-gray-600 focus:ring-2 focus:ring-indigo-600"
+              className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-100">
-              Senha
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+              Crie uma Senha
             </label>
             <input
               id="password"
-              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="block w-full rounded-md bg-gray-800 px-3 py-2 text-gray-100 border border-gray-600 focus:ring-2 focus:ring-indigo-600"
+              className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-
-          <div>
-            <button
-              type="submit"
-              className="w-full rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500"
-            >
-              Criar Conta
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-4">
           <button
-            onClick={handleGoogleSignUp}
-            className="w-full flex items-center justify-center gap-2 rounded-md bg-white px-3 py-2 text-gray-800 border border-gray-300 hover:bg-gray-100"
+            type="submit"
+            disabled={isProcessing || !isLoaded}
+            className={`w-full p-2 mt-2 rounded-md text-white font-bold ${
+              isProcessing ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-500'
+            } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           >
-            <FcGoogle size={20} /> Registrar com Google
+            {isProcessing ? 'Criando conta...' : 'Criar Conta'}
           </button>
-        </div>
-
+        </form>
+        <button
+          onClick={handleGoogleSignUp}
+          className="w-full p-2 mt-4 flex items-center justify-center bg-white text-black font-bold rounded-md shadow-md hover:bg-gray-200"
+        >
+          <FcGoogle className="mr-2" /> Criar conta com Google
+        </button>
         <p className="mt-6 text-center text-sm text-gray-400">
           Já tem uma conta?{' '}
-          <a href="/auth/sign-in" className="font-semibold text-indigo-400 hover:text-indigo-300">
-            Faça login
+          <a href="/auth/sign-in" className="text-indigo-400 hover:underline">
+            Faça Login
           </a>
         </p>
       </div>

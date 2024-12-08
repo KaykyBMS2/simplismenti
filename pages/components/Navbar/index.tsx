@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import NavItem, { NavItemInterface } from "../NavItem";
 import { usePathname } from "next/navigation";
-import { FaBars, FaXmark} from "react-icons/fa6";
+import { FaBars, FaXmark } from "react-icons/fa6";
 import { BsFillQuestionCircleFill } from "react-icons/bs";
 import { FaCog } from "react-icons/fa";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, useUser, UserButton } from "@clerk/nextjs";
+import Loading from '../../Loading';
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
@@ -20,6 +21,7 @@ export default function Navbar() {
     ];
 
     const pathname = usePathname();
+    const { isLoaded, isSignedIn, user } = useUser();
     const [openMenu, setOpenMenu] = useState<boolean>(false);
     const [themeLogo, setThemeLogo] = useState<string>("spm_white.svg");
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -38,6 +40,10 @@ export default function Navbar() {
             darkModeMediaQuery.removeEventListener("change", updateLogo);
         };
     }, []);
+
+    if (!isLoaded) {
+        // Renderiza um estado de carregamento enquanto os dados de autenticação estão sendo carregados
+        return <Loading />; }
 
     return (
         <header className="pt-[20px] pb-[75px] bg-gray-100 dark:bg-slate-800 flex justify-center z-50">
@@ -68,17 +74,26 @@ export default function Navbar() {
                 <div className="flex items-center">
                     <SignedOut>
                         <div className="bg-blue-500 text-white py-2 px-2 rounded-full hover:bg-blue-700 font-medium">
-                            <SignInButton>entrar</SignInButton>
+                            <SignInButton>Entrar</SignInButton>
                         </div>
                     </SignedOut>
                     <SignedIn>
-                        <UserButton
-                            appearance={{
-                                elements: {
-                                    userButtonAvatarBox: "w-10 h-10 rounded-full",
-                                },
-                            }}
-                        />
+                        <div className="flex items-center space-x-4">
+                            {/* Nome do usuário logado */}
+                            {user?.firstName && (
+                                <span className="text-gray-800 dark:text-gray-300">
+                                    Olá, {user.firstName}!
+                                </span>
+                            )}
+                            {/* Botão de perfil ou logout */}
+                            <UserButton
+                                appearance={{
+                                    elements: {
+                                        userButtonAvatarBox: "w-10 h-10 rounded-full",
+                                    },
+                                }}
+                            />
+                        </div>
                     </SignedIn>
                 </div>
 
@@ -90,25 +105,25 @@ export default function Navbar() {
                             border border-gray-200 dark:border-gray-700"
                     >
                         {/* Botão de interrogação*/}
-                       <div className="align-center flex flex-row gap-[80%]">
-                           <div className="w-auto mx-auto mb-4 flex justify-start">
-                            <button
-                                className="text-gray-800 dark:text-gray-300 text-1xl transition-transform hover:scale-110"
-                                aria-label="Dúvidas"
-                            >
-                                <BsFillQuestionCircleFill />
-                            </button>
+                        <div className="align-center flex flex-row gap-[80%]">
+                            <div className="w-auto mx-auto mb-4 flex justify-start">
+                                <button
+                                    className="text-gray-800 dark:text-gray-300 text-1xl transition-transform hover:scale-110"
+                                    aria-label="Dúvidas"
+                                >
+                                    <BsFillQuestionCircleFill />
+                                </button>
+                            </div>
+                            {/* Botão de configurações */}
+                            <div className="w-auto mx-auto mb-4 flex justify-end">
+                                <button
+                                    className="text-gray-800 dark:text-gray-300 text-1xl transition-transform hover:scale-110"
+                                    aria-label="Configurações"
+                                >
+                                    <FaCog />
+                                </button>
+                            </div>
                         </div>
-                        {/* Botão de configurações */}
-                        <div className="w-auto mx-auto mb-4 flex justify-end">
-                            <button
-                                className="text-gray-800 dark:text-gray-300 text-1xl transition-transform hover:scale-110"
-                                aria-label="Configurações"
-                            >
-                                <FaCog />
-                            </button>
-                        </div>
-                     </div>
 
                         {/* Barra de pesquisa */}
                         <div className="w-full mb-4">
