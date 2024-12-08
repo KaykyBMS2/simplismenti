@@ -17,7 +17,10 @@ export default function SignInPage() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded || isProcessing) return;
+    if (!isLoaded || isProcessing || !signIn) {
+      setError('Não foi possível processar o login. Tente novamente mais tarde.');
+      return;
+    }
 
     setIsProcessing(true);
     setError('');
@@ -54,6 +57,11 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     console.log('Iniciando autenticação com Google...');
+    if (!signIn) {
+      setError('Serviço de autenticação não carregado. Tente novamente mais tarde.');
+      return;
+    }
+
     try {
       await signIn.authenticateWithRedirect({ strategy: 'oauth_google' });
       console.log('Redirecionado para autenticação com Google.');
