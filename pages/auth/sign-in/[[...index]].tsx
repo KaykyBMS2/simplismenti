@@ -24,9 +24,11 @@ export default function SignInPage() {
     }
 
     try {
+      // Corrigido: agora inclui redirectUrlComplete
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: window.location.origin + '/auth/callback',  // Certifique-se que o redirectUrl é correto.
+        redirectUrl: window.location.origin + '/auth/callback',  // Redireciona para a página de callback
+        redirectUrlComplete: window.location.origin + '/',  // Redireciona para a página inicial após o login
       });
       console.log('Redirecionado para autenticação com Google.');
     } catch (err) {
