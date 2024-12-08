@@ -1,82 +1,59 @@
+// pages/auth/verify.tsx
 'use client';
 
-import { useSignUp } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useVerifyEmailAddress } from '@clerk/nextjs';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function VerifyEmailPage() {
-  const { signUp, isLoaded } = useSignUp();
+  const { verifyEmailAddress } = useVerifyEmailAddress();
+  const [otp, setOtp] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleVerify = async (e) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded || isProcessing) return;
-
-    setIsProcessing(true);
-    setError('');
 
     try {
-      console.log("Verificando código:", code);
-
-      // Tenta verificar o código enviado por email
-      const result = await signUp.attemptEmailAddressVerification({ code });
-      console.log("Email verificado com sucesso:", result);
-
-      // Redireciona para a página inicial ou dashboard
-      router.push('/');
-    } catch (err) {
-      console.error("Erro ao verificar código:", err);
-      setError(
-        err.errors?.[0]?.longMessage || 
-        'Erro ao verificar o código. Tente novamente.'
-      );
-    } finally {
-      setIsProcessing(false);
+      await verifyEmailAddress(otp);
+      router.push('/auth/sign-in');  // Redireciona para a página de login
+    } catch (err: any) {
+      setError('Código de verificação inválido');
     }
   };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-900">
       <div className="w-[90%] max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-white text-center mb-6">Verifique seu Email</h1>
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        <form onSubmit={handleVerify} className="space-y-4">
+        <h1 className="text-2xl font-bold text-white text-center mb-6">Verificação de Email</h1>
+        <form className="space-y-4" onSubmit={handleVerify}>
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-2">
+              {error}
+            </p>
+          )}
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-gray-300">
+            <label htmlFor="otp" className="block text-sm font-medium text-gray-300">
               Código de Verificação
             </label>
             <input
-              id="code"
+              id="otp"
               type="text"
-              placeholder="Insira o código"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
               required
               className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          <button
-            type="submit"
-            disabled={isProcessing}
-            className={`w-full p-2 mt-2 rounded-md text-white font-bold ${
-              isProcessing ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-500'
-            } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          >
-            {isProcessing ? 'Verificando...' : 'Verificar Código'}
-          </button>
+          <div>
+            <button
+              type="submit"
+              className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              Verificar Email
+            </button>
+          </div>
         </form>
-        <p className="mt-6 text-center text-sm text-gray-400">
-          Não recebeu o código?{' '}
-          <button
-            onClick={() => signUp.prepareEmailAddressVerification()}
-            className="text-indigo-400 hover:underline"
-          >
-            Reenviar código
-          </button>
-        </p>
       </div>
     </div>
   );

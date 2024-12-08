@@ -1,136 +1,93 @@
 'use client';
 
+import { useState } from 'react';
 import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { FcGoogle } from 'react-icons/fc';
-import React, { useState } from 'react';
 
 export default function SignUpPage() {
-  const { signUp, isLoaded } = useSignUp();
-  const router = useRouter();
-  const [username, setUsername] = useState('');
+  const { isLoaded, signUp } = useSignUp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
-  // Corrigido: Tipagem de 'e' como React.FormEvent
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded || isProcessing) return;
 
-    setIsProcessing(true);
-    setError('');
+    if (!isLoaded) return;
 
     try {
-      console.log("Criando conta com:", { email, password, username });
-
-      // Cria o usuário no Clerk
-      const result = await signUp.create({
-        emailAddress: email,
-        password,
-        unsafeMetadata: { username }, // Armazena o username nos metadados
-      });
-
-      console.log("Conta criada com sucesso:", result);
-
-      // Tenta enviar o email de verificação
+      await signUp.create({ emailAddress: email, password });
       await signUp.prepareEmailAddressVerification();
-      console.log("Email de verificação enviado.");
-
-      // Redireciona para a página de verificação
-      router.push('/auth/verify');
-    } catch (err) {
-      console.error("Erro ao criar conta:", err);
-      setError(
-        err.errors?.[0]?.longMessage || 
-        'Erro ao criar a conta. Verifique os dados e tente novamente.'
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    try {
-      // Corrigido: adiciona redirectUrlComplete e redirectUrl
-      await signUp.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: window.location.origin + '/auth/callback',  // URL de retorno após autenticação com Google
-        redirectUrlComplete: window.location.origin + '/',      // Redirecionamento após autenticação bem-sucedida
-      });
-    } catch (err) {
-      console.error("Erro ao autenticar com Google:", err);
-      setError('Erro ao autenticar com Google. Tente novamente.');
+      setSuccess(true);
+    } catch (err: any) {
+      setError('Erro ao criar conta. Verifique os dados e tente novamente.');
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-900">
-      <div className="w-[90%] max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
-        <img alt="SPM logo" src="/spm_white.svg" className="mx-auto h-[150px] w-auto" />
-        <h1 className="text-2xl font-bold text-white text-center mb-6 mt-6">Crie sua Conta</h1>
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-300">
-              Crie um Nome
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-              Seu melhor email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-              Crie uma Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full p-2 mt-1 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isProcessing}
-            className={`w-full p-2 mt-2 rounded-md text-white font-bold ${
-              isProcessing ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-500'
-            } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          >
-            {isProcessing ? 'Criando conta...' : 'Criar Conta'}
-          </button>
-        </form>
-        <button
-          onClick={handleGoogleSignUp}
-          className="w-full p-2 mt-4 flex items-center justify-center bg-white text-black font-bold rounded-md shadow-md hover:bg-gray-200"
-        >
-          <FcGoogle className="mr-2" /> Criar conta com Google
-        </button>
+    <div className="flex h-screen w-screen flex-col justify-center items-center bg-gray-900">
+      <div className="text-center">
+        <img src="/spm_white.svg" alt="SPM logo" className="mx-auto h-32 w-auto" />
+        <h2 className="mt-10 text-2xl font-bold text-gray-100">Crie sua conta!</h2>
+      </div>
+
+      <div className="w-full max-w-sm mt-8">
+        {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+        {success && (
+          <p className="text-sm text-green-500 text-center">
+            Verifique seu email para concluir o registro.
+          </p>
+        )}
+
+        {!success && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-100">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="block w-full rounded-md bg-gray-800 px-3 py-2 text-gray-100 border border-gray-600 focus:ring-2 focus:ring-indigo-600"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-100">
+                Senha
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="block w-full rounded-md bg-gray-800 px-3 py-2 text-gray-100 border border-gray-600 focus:ring-2 focus:ring-indigo-600"
+              />
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                className="w-full rounded-md bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500"
+              >
+                Criar Conta
+              </button>
+            </div>
+          </form>
+        )}
+
         <p className="mt-6 text-center text-sm text-gray-400">
           Já tem uma conta?{' '}
-          <a href="/auth/sign-in" className="text-indigo-400 hover:underline">
-            Faça Login
+          <a href="/auth/sign-in" className="font-semibold text-indigo-400 hover:text-indigo-300">
+            Faça login
           </a>
         </p>
       </div>
