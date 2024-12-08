@@ -4,7 +4,7 @@ import { useClerk } from '@clerk/nextjs';
 import React, { useState } from 'react';
 
 export default function ForgotPasswordPage() {
-  const { client } = useClerk();
+  const { clerkClient } = useClerk();  // Usando o clerkClient diretamente
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -22,8 +22,8 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      // Método correto para enviar link de redefinição de senha
-      await client.messages.resetPasswordForUser({
+      // Usando o método correto para resetar a senha
+      await clerkClient.users.resetPasswordForUser({
         emailAddress: email,
       });
 
